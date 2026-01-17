@@ -10,25 +10,45 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout repo
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2️⃣ Setup Node
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      # 3️⃣ Install dependencies (in react-frontend folder)
       - name: Install dependencies
+        working-directory: react-app/react-frontend
         run: npm install
 
+      # 4️⃣ Build project
       - name: Build project
+        working-directory: react-app/react-frontend
         run: npm run build
 
+      # 5️⃣ Setup SSH key (using base64 encoded secret)
+      - name: Setup SSH key
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY_BASE64 }}" | base64 --decode > ~/github_actions_key
+          chmod 600 ~/github_actions_key
+
+      # 6️⃣ Clear old files on EC2
+      - name: Clear old files
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/github_actions_key ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "rm -rf /var/www/html/*"
+
+      # 7️⃣ Copy new build to EC2
       - name: Deploy to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "react-app/react-frontend/dist/*" 
+          key_path: ~/github_actions_key
+          source: "react-app/react-frontend/dist/*"
           target: "/var/www/html"
+          port: 22
+          recursive: true
