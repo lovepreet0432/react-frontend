@@ -20,9 +20,13 @@ jobs:
         with:
           node-version: 20
 
-      # 3️⃣ Optional: List repo contents to debug paths
+      # 3️⃣ Debug repo structure
       - name: List repo contents
-        run: ls -R
+        run: |
+          echo "Current working directory: $PWD"
+          ls -al
+          echo "Listing all files recursively:"
+          ls -R
 
       # 4️⃣ Install dependencies
       - name: Install dependencies
@@ -52,7 +56,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key_path: ~/github_actions_key
-          source: "./react-app/react-frontend/dist/*"   # CRA users: build/* instead of dist/*
+          source: "./react-app/react-frontend/dist/*"   # CRA: build/*
           target: "/var/www/html"
           port: 22
           recursive: true
