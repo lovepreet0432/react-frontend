@@ -30,12 +30,10 @@ jobs:
 
       # 4️⃣ Install dependencies
       - name: Install dependencies
-        working-directory: ./react-app/react-frontend
         run: npm install
 
       # 5️⃣ Build project
       - name: Build project
-        working-directory: ./react-app/react-frontend
         run: npm run build
 
       # 6️⃣ Setup SSH key (base64)
